@@ -1,0 +1,65 @@
+buildscript {
+    repositories {
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+    dependencies {
+        classpath "gradle.plugin.com.hierynomus.gradle.plugins:license-gradle-plugin:0.16.1"
+        classpath "com.gradle.publish:plugin-publish-plugin:0.21.0"
+    }
+}
+
+apply plugin: "groovy"
+apply plugin: "com.gradle.plugin-publish"
+
+defaultTasks "licenseFormat", "build"
+
+group = "org.spongepowered"
+version = "0.6.1"
+archivesBaseName = "mixingradle"
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation gradleApi()
+    implementation "com.google.guava:guava:31.1-jre"
+    implementation "org.ow2.asm:asm-debug-all:5.2"
+}
+
+processResources {
+   from "LICENSE"
+}
+
+jar.manifest.mainAttributes (
+    "Built-By": System.properties["user.name"],
+    "Created-By": System.properties["java.vm.version"] + " (" + System.properties["java.vm.vendor"] + ")",
+    "Implementation-Title": name,
+    "Implementation-Version": version
+)
+
+task groovydocJar(type: Jar, dependsOn: groovydoc) {
+    from groovydoc.destinationDir
+    classifier = "groovydoc"
+}
+
+artifacts {
+    archives jar
+    archives groovydocJar
+}
+
+pluginBundle {
+    website = "https://github.com/MinetaS/MixinGradle"
+    vcsUrl = "https://github.com/MinetaS/MixinGradle"
+    description = "Gradle plugin for SpongePowered Mixin"
+    tags = ["spongepowered", "sponge", "mixin"]
+    plugins {
+        patcher {
+            id = "org.spongepowered.mixin"
+            displayName = "SpongePowered Mixin Gradle Plugin"
+        }
+    }
+}
